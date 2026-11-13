@@ -121,7 +121,7 @@ namespace CleaningProductsApp
             {
                 found = true;
 
-                Console.WriteLine("----------------------");
+               
                 Console.WriteLine("ID: " + reader.GetInt32(0));
                 Console.WriteLine("Name: " + reader.GetString(1));
                 Console.WriteLine("Brand: " + reader.GetString(2));
