@@ -1,58 +1,65 @@
-﻿using Microsoft.Data.SqlClient;
+﻿
+using CleaningProductsRegistry;
+using Microsoft.Data.SqlClient;
 using System;
 
-namespace ContactBookApp
+namespace CleaningProductsApp
 {
-    public class ContactRepository
+    public class ProductRepository
     {
         public void Get()
         {
             using var connection = new SqlConnection(MyConnection.connection);
             connection.Open();
 
-            var query = "SELECT Id, Name, Phone, Email, Address FROM contacts";
+            var query = "SELECT Id, Name, Brand, Category, Price, Stock FROM Products";
+
             using var command = new SqlCommand(query, connection);
             using var reader = command.ExecuteReader();
 
             ShowRows(reader);
         }
 
-        public void Insert(string name, string phone, string email, string address)
+        public void Insert(string name, string brand, string category, decimal price, int stock)
         {
             using var connection = new SqlConnection(MyConnection.connection);
             connection.Open();
 
-            var query = @"INSERT INTO contacts (Name, Phone, Email, Address)
-                          VALUES (@Name, @Phone, @Email, @Address)";
+            var query = @"INSERT INTO Products (Name, Brand, Category, Price, Stock)
+                          VALUES (@Name, @Brand, @Category, @Price, @Stock)";
 
             using var command = new SqlCommand(query, connection);
+
             command.Parameters.AddWithValue("@Name", name);
-            command.Parameters.AddWithValue("@Phone", phone);
-            command.Parameters.AddWithValue("@Email", email);
-            command.Parameters.AddWithValue("@Address", address);
+            command.Parameters.AddWithValue("@Brand", brand);
+            command.Parameters.AddWithValue("@Category", category);
+            command.Parameters.AddWithValue("@Price", price);
+            command.Parameters.AddWithValue("@Stock", stock);
 
             command.ExecuteNonQuery();
         }
 
-      
-        public void Update(int id, string name, string phone, string email, string address)
+        public void Update(int id, string name, string brand, string category, decimal? price, int? stock)
         {
             using var connection = new SqlConnection(MyConnection.connection);
             connection.Open();
 
-            var query = @"UPDATE contacts SET
-                            Name    = COALESCE(NULLIF(@Name, ''), Name),
-                            Phone   = COALESCE(NULLIF(@Phone, ''), Phone),
-                            Email   = COALESCE(NULLIF(@Email, ''), Email),
-                            Address = COALESCE(NULLIF(@Address, ''), Address)
+            var query = @"UPDATE Products SET
+                          Name = COALESCE(NULLIF(@Name, ''), Name),
+                          Brand = COALESCE(NULLIF(@Brand, ''), Brand),
+                          Category = COALESCE(NULLIF(@Category, ''), Category),
+                          Price = COALESCE(@Price, Price),
+                          Stock = COALESCE(@Stock, Stock)
                           WHERE Id = @Id";
 
             using var command = new SqlCommand(query, connection);
+
             command.Parameters.AddWithValue("@Id", id);
             command.Parameters.AddWithValue("@Name", name);
-            command.Parameters.AddWithValue("@Phone", phone);
-            command.Parameters.AddWithValue("@Email", email);
-            command.Parameters.AddWithValue("@Address", address);
+            command.Parameters.AddWithValue("@Brand", brand);
+            command.Parameters.AddWithValue("@Category", category);
+            command.Parameters.AddWithValue("@Price", (object?)price ?? DBNull.Value);
+            command.Parameters.AddWithValue("@Stock", (object?)stock ?? DBNull.Value);
 
             command.ExecuteNonQuery();
         }
@@ -62,27 +69,27 @@ namespace ContactBookApp
             using var connection = new SqlConnection(MyConnection.connection);
             connection.Open();
 
-            var query = "DELETE FROM contacts WHERE Id = @Id";
+            var query = "DELETE FROM Products WHERE Id = @Id";
+
             using var command = new SqlCommand(query, connection);
             command.Parameters.AddWithValue("@Id", id);
 
             command.ExecuteNonQuery();
         }
 
-       
         public string? GetName(int id)
         {
             using var connection = new SqlConnection(MyConnection.connection);
             connection.Open();
 
-            var query = "SELECT Name FROM contacts WHERE Id = @Id";
+            var query = "SELECT Name FROM Products WHERE Id = @Id";
+
             using var command = new SqlCommand(query, connection);
             command.Parameters.AddWithValue("@Id", id);
 
             return command.ExecuteScalar() as string;
         }
 
-        
         public void Search(int option, string data)
         {
             using var connection = new SqlConnection(MyConnection.connection);
@@ -92,35 +99,39 @@ namespace ContactBookApp
             {
                 1 => "CAST(Id AS NVARCHAR(10)) = @Data",
                 2 => "Name LIKE '%' + @Data + '%'",
-                3 => "Phone LIKE '%' + @Data + '%'",
-                _ => "Email LIKE '%' + @Data + '%'"
+                3 => "Brand LIKE '%' + @Data + '%'",
+                _ => "Category LIKE '%' + @Data + '%'"
             };
 
-            var query = "SELECT Id, Name, Phone, Email, Address FROM contacts WHERE " + where;
+            var query = "SELECT Id, Name, Brand, Category, Price, Stock FROM Products WHERE " + where;
+
             using var command = new SqlCommand(query, connection);
             command.Parameters.AddWithValue("@Data", data);
 
             using var reader = command.ExecuteReader();
+
             ShowRows(reader);
         }
 
         private void ShowRows(SqlDataReader reader)
         {
-            bool any = false;
+            bool found = false;
 
             while (reader.Read())
             {
-                any = true;
+                found = true;
+
                 Console.WriteLine("----------------------");
-                Console.WriteLine("ID " + reader.GetInt32(0));
-                Console.WriteLine("Name " + reader.GetString(1));
-                Console.WriteLine("Phone " + reader.GetString(2));
-                Console.WriteLine("Email " + reader.GetString(3));
-                Console.WriteLine("Address " + reader.GetString(4));
+                Console.WriteLine("ID: " + reader.GetInt32(0));
+                Console.WriteLine("Name: " + reader.GetString(1));
+                Console.WriteLine("Brand: " + reader.GetString(2));
+                Console.WriteLine("Category: " + reader.GetString(3));
+                Console.WriteLine("Price: " + reader.GetDecimal(4));
+                Console.WriteLine("Stock: " + reader.GetInt32(5));
             }
 
-            if (!any)
-                Console.WriteLine("There are no contacts");
+            if (!found)
+                Console.WriteLine("There are no products");
         }
     }
 }

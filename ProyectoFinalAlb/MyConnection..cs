@@ -1,8 +1,9 @@
-﻿namespace ContactBookApp
+﻿
+namespace CleaningProductsRegistry
 {
     public static class MyConnection
     {
-        public static string connection =>
-            "server = localhost; Database = ContactBook; Integrated Security = true; TrustServerCertificate = True;";
+        public static string connection =
+            "Server=localhost;Database=CleaningProductsDB;Integrated Security=True;TrustServerCertificate=True;";
     }
 }
