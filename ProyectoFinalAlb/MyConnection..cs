@@ -1,9 +1,16 @@
 ﻿
-namespace CleaningProductsRegistry
+using Microsoft.EntityFrameworkCore;
+
+namespace CleaningProductsApp
 {
-    public static class MyConnection
+    public class MyConnection : DbContext
     {
-        public static string connection =
-            "Server=localhost; Database=CleaningProductsDB;Integrated Security=True;TrustServerCertificate=True;";
+        public DbSet<Product> Products { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        {
+            options.UseSqlServer(
+                "Server=localhost;Database=CleaningProductsDB;Integrated Security=True;TrustServerCertificate=True;");
+        }
     }
 }
