@@ -1,69 +1,31 @@
-﻿
-using System;
-using System.Collections.Generic;
+﻿using ContactBookApp;
 
-class Contact
+var repository = new ContactRepository();
+
+while (true)
 {
-    public int Id { get; private set; }
-    public string Name { get; private set; }
-    public string Phone { get; private set; }
-    public string Email { get; private set; }
-    public string Address { get; private set; }
+    Console.Clear();
+    Console.WriteLine("MY CONTACT BOOK");
 
-    public Contact(int id, string name, string phone, string email, string address)
+    Console.WriteLine("1 - Add Contact");
+    Console.WriteLine("2 - View Contacts");
+    Console.WriteLine("3 - Search Contact");
+    Console.WriteLine("4 - Edit Contact");
+    Console.WriteLine("5 - Delete Contact");
+    Console.WriteLine("6 - Exit");
+    Console.Write("Choose an option: ");
+
+    var option = Console.ReadLine();
+
+    if (option == "1")
     {
-        Id = id;
-        Name = name;
-        Phone = phone;
-        Email = email;
-        Address = address;
-    }
-
-    public void Edit(string name, string phone, string email, string address)
-    {
-        if (name != "")
-            Name = name;
-
-        if (phone != "")
-            Phone = phone;
-
-        if (email != "")
-            Email = email;
-
-        if (address != "")
-            Address = address;
-    }
-
-    public void Show()
-    {
-        Console.WriteLine("----------------------");
-        Console.WriteLine("ID " + Id);
-        Console.WriteLine("Name " + Name);
-        Console.WriteLine("Phone " + Phone);
-        Console.WriteLine("Email " + Email);
-        Console.WriteLine("Address " + Address);
-    }
-}
-
-class ContactBook
-{
-    private List<Contact> contacts = new List<Contact>();
-    private int newId = 1;
-
-    public void AddContact()
-    {
-        Console.WriteLine("ADD CONTACT");
-
-        Console.Write("Enter the name ");
+        Console.Write("Enter the name: ");
         string name = Console.ReadLine() ?? "";
-
-        Console.Write("Enter the phone number ");
+        Console.Write("Enter the phone number: ");
         string phone = Console.ReadLine() ?? "";
-
-        Console.Write("Enter the email ");
+        Console.Write("Enter the email: ");
         string email = Console.ReadLine() ?? "";
-
-        Console.Write("Enter the address ");
+        Console.Write("Enter the address: ");
         string address = Console.ReadLine() ?? "";
 
         if (name == "" || phone == "" || email == "" || address == "")
@@ -72,244 +34,123 @@ class ContactBook
         }
         else
         {
-            Contact contact = new Contact(newId, name, phone, email, address);
-
-            contacts.Add(contact);
-
+            repository.Insert(name, phone, email, address);
             Console.WriteLine("Contact added successfully");
-            Console.WriteLine("Contact ID " + newId);
-
-            newId++;
         }
+        WaitForSpace();
     }
-
-    public void ViewContacts()
+    else if (option == "2")
     {
         Console.WriteLine("CONTACT LIST");
-
-        if (contacts.Count == 0)
-        {
-            Console.WriteLine("There are no contacts");
-        }
-        else
-        {
-            foreach (Contact contact in contacts)
-            {
-                contact.Show();
-            }
-        }
+        repository.Get();
+        WaitForSpace();
     }
-
-    public void SearchContact()
+    else if (option == "3")
     {
-        Console.WriteLine("SEARCH CONTACT");
         Console.WriteLine("1 Search by ID");
         Console.WriteLine("2 Search by name");
         Console.WriteLine("3 Search by phone");
         Console.WriteLine("4 Search by email");
+        Console.Write("Select an option: ");
 
-        Console.Write("Select an option ");
-
-        if (!int.TryParse(Console.ReadLine(), out int option))
+        if (!int.TryParse(Console.ReadLine(), out int searchOption) || searchOption < 1 || searchOption > 4)
         {
             Console.WriteLine("Invalid option");
-            return;
-        }
-
-        if (option < 1 || option > 4)
-        {
-            Console.WriteLine("Invalid option");
-            return;
-        }
-
-        Console.Write("Enter what you want to search ");
-        string data = Console.ReadLine() ?? "";
-
-        bool found = false;
-
-        foreach (Contact contact in contacts)
-        {
-            bool matches = false;
-
-            if (option == 1 && contact.Id.ToString() == data)
-                matches = true;
-
-            if (option == 2 && contact.Name.ToLower().Contains(data.ToLower()))
-                matches = true;
-
-            if (option == 3 && contact.Phone.Contains(data))
-                matches = true;
-
-            if (option == 4 && contact.Email.ToLower().Contains(data.ToLower()))
-                matches = true;
-
-            if (matches)
-            {
-                contact.Show();
-                found = true;
-            }
-        }
-
-        if (!found)
-        {
-            Console.WriteLine("Contact not found");
-        }
-    }
-
-    public void EditContact()
-    {
-        Console.WriteLine("EDIT CONTACT");
-
-        Console.Write("Enter the contact ID ");
-
-        if (!int.TryParse(Console.ReadLine(), out int id))
-        {
-            Console.WriteLine("Invalid ID");
-            return;
-        }
-
-        Contact selected = null;
-
-        foreach (Contact contact in contacts)
-        {
-            if (contact.Id == id)
-            {
-                selected = contact;
-                break;
-            }
-        }
-
-        if (selected == null)
-        {
-            Console.WriteLine("Contact not found");
-            return;
-        }
-
-        Console.Write("New name ");
-        string name = Console.ReadLine() ?? "";
-
-        Console.Write("New phone number ");
-        string phone = Console.ReadLine() ?? "";
-
-        Console.Write("New email ");
-        string email = Console.ReadLine() ?? "";
-
-        Console.Write("New address ");
-        string address = Console.ReadLine() ?? "";
-
-        selected.Edit(name, phone, email, address);
-
-        Console.WriteLine("Contact updated successfully");
-    }
-
-    public void DeleteContact()
-    {
-        Console.WriteLine("DELETE CONTACT");
-
-        Console.Write("Enter the contact ID ");
-
-        if (!int.TryParse(Console.ReadLine(), out int id))
-        {
-            Console.WriteLine("Invalid ID");
-            return;
-        }
-
-        Contact selected = null;
-
-        foreach (Contact contact in contacts)
-        {
-            if (contact.Id == id)
-            {
-                selected = contact;
-                break;
-            }
-        }
-
-        if (selected == null)
-        {
-            Console.WriteLine("Contact not found");
-            return;
-        }
-
-        Console.WriteLine("Name " + selected.Name);
-
-        Console.Write("Do you want to delete this contact? (1 = Yes, 2 = No) ");
-
-        if (!int.TryParse(Console.ReadLine(), out int option))
-        {
-            Console.WriteLine("Invalid option");
-            return;
-        }
-
-        if (option == 1)
-        {
-            contacts.Remove(selected);
-            Console.WriteLine("Contact deleted successfully");
         }
         else
         {
-            Console.WriteLine("Deletion canceled");
+            Console.Write("Enter what you want to search: ");
+            string data = Console.ReadLine() ?? "";
+            repository.Search(searchOption, data);
         }
+        WaitForSpace();
+    }
+    else if (option == "4")
+    {
+        Console.WriteLine("The registered contacts are:");
+        repository.Get();
+
+        Console.Write("Enter the contact ID: ");
+        if (!int.TryParse(Console.ReadLine(), out int id))
+        {
+            Console.WriteLine("Invalid ID");
+        }
+        else if (repository.GetName(id) == null)
+        {
+            Console.WriteLine("Contact not found");
+        }
+        else
+        {
+            Console.WriteLine("(Leave a field empty to keep its current value)");
+            Console.Write("New name: ");
+            string name = Console.ReadLine() ?? "";
+            Console.Write("New phone number: ");
+            string phone = Console.ReadLine() ?? "";
+            Console.Write("New email: ");
+            string email = Console.ReadLine() ?? "";
+            Console.Write("New address: ");
+            string address = Console.ReadLine() ?? "";
+
+            repository.Update(id, name, phone, email, address);
+
+            Console.WriteLine("Contact updated successfully");
+            Console.WriteLine("The list is now:");
+            repository.Get();
+        }
+        WaitForSpace();
+    }
+    else if (option == "5")
+    {
+        Console.WriteLine("The registered contacts are:");
+        repository.Get();
+
+        Console.Write("Enter the ID of the contact to delete: ");
+        if (!int.TryParse(Console.ReadLine(), out int id))
+        {
+            Console.WriteLine("Invalid ID");
+        }
+        else
+        {
+            string? name = repository.GetName(id);
+
+            if (name == null)
+            {
+                Console.WriteLine("Contact not found");
+            }
+            else
+            {
+                Console.WriteLine("Name " + name);
+                Console.Write("Do you want to delete this contact? (1 = Yes, 2 = No): ");
+
+                if (Console.ReadLine() == "1")
+                {
+                    repository.Delete(id);
+                    Console.WriteLine("Contact deleted successfully");
+                    Console.WriteLine("The list is now:");
+                    repository.Get();
+                }
+                else
+                {
+                    Console.WriteLine("Deletion canceled");
+                }
+            }
+        }
+        WaitForSpace();
+    }
+    else if (option == "6")
+    {
+        Console.WriteLine("Thank you for using My Contact Book");
+        break;
     }
 }
 
-class Program
+static void WaitForSpace()
 {
-    static void Main()
+    Console.WriteLine();
+    Console.WriteLine("Press SPACE to continue...");
+
+    // ReadKey(true) no muestra la tecla en pantalla
+    while (Console.ReadKey(true).Key != ConsoleKey.Spacebar)
     {
-        ContactBook book = new ContactBook();
-
-        bool running = true;
-
-        while (running)
-        {
-            Console.WriteLine();
-            Console.WriteLine("1 Add Contact");
-            Console.WriteLine("2 View Contacts");
-            Console.WriteLine("3 Search Contact");
-            Console.WriteLine("4 Edit Contact");
-            Console.WriteLine("5 Delete Contact");
-            Console.WriteLine("6 Exit");
-
-            Console.Write("Choose an option ");
-
-            if (!int.TryParse(Console.ReadLine(), out int option))
-            {
-                Console.WriteLine("You must enter a number");
-                continue;
-            }
-
-            switch (option)
-            {
-                case 1:
-                    book.AddContact();
-                    break;
-
-                case 2:
-                    book.ViewContacts();
-                    break;
-
-                case 3:
-                    book.SearchContact();
-                    break;
-
-                case 4:
-                    book.EditContact();
-                    break;
-
-                case 5:
-                    book.DeleteContact();
-                    break;
-
-                case 6:
-                    running = false;
-                    Console.WriteLine("Thank you for using My Contact Book");
-                    break;
-
-                default:
-                    Console.WriteLine("Invalid option");
-                    break;
-            }
-        }
     }
 }
