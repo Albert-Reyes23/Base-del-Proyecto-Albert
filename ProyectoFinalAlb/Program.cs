@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 
 Dictionary<int, string> names = new Dictionary<int, string>();
 Dictionary<int, string> brands = new Dictionary<int, string>();
